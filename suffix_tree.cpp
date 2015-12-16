@@ -170,3 +170,18 @@ void suffix_tree::clear(suffix_tree::vertex *start) {
 
     delete start;
 }
+
+size_t suffix_tree::count_substrings() {
+    size_t counter = count_substrings(root);
+    counter -= string.size();   // 0-end substrings
+    return counter;
+}
+
+size_t suffix_tree::count_substrings(suffix_tree::vertex *start) {
+    size_t counter = 0;
+    for (auto &item : start->edges) {
+        counter += item.second.to->depth - start->depth + count_substrings(item.second.to);
+    }
+
+    return counter;
+}

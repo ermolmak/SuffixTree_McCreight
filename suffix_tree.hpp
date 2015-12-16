@@ -57,4 +57,9 @@ private:
     vertex *scanning(size_t suffix, vertex *alpha_beta_locus, vertex *head);
 
     void clear(vertex *start);
+
+public:
+    size_t count_substrings();
+private:
+    size_t count_substrings(vertex *start);
 };
