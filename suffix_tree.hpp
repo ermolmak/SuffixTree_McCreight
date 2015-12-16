@@ -38,7 +38,7 @@ private:
         std::map<size_t, edge>::iterator current_edge;
         size_t edge_position;
 
-        position(const std::map<size_t, edge>::iterator &current_edge);
+        explicit position(vertex *last_vertex);
     };
 
     static std::vector<size_t> &&add_0(std::vector<size_t> string_);
@@ -56,5 +56,7 @@ private:
     void check_string() const;
     void build();
     void build_first();
-    vertex *alpha_locus(vertex *head);
+    vertex *get_alpha_locus(vertex *head) const;
+    vertex *rescanning(vertex *alpha_locus, size_t beta_begin, size_t beta_end);
+    vertex *scanning(vertex *alpha_beta_locus, vertex *head);
 };

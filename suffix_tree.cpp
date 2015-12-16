@@ -17,11 +17,12 @@ suffix_tree::edge::edge(size_t string_begin, size_t string_end, vertex *from, ve
         string_begin(string_begin), string_end(string_end), from(from), to(to) {
 }
 
-suffix_tree::position::position(const std::map<size_t, edge>::iterator &current_edge):
-        current_edge(current_edge), edge_position(0) {
+suffix_tree::position::position(vertex *last_vertex):
+        last_vertex(last_vertex), current_edge(), edge_position(0) {
 }
 
-suffix_tree::suffix_tree(const std::vector<size_t> &string_): string(add_0(string_)) {
+suffix_tree::suffix_tree(const std::vector<size_t> &string_):
+        string(add_0(string_)) {
     check_string();
     build();
 }
@@ -105,7 +106,7 @@ void suffix_tree::build_first() {
     children->parent = root;
 }
 
-suffix_tree::vertex *suffix_tree::alpha_locus(suffix_tree::vertex *head) {
+suffix_tree::vertex *suffix_tree::get_alpha_locus(suffix_tree::vertex *head) const {
     if (head == root) {
         return root;
     }
@@ -117,5 +118,26 @@ suffix_tree::vertex *suffix_tree::alpha_locus(suffix_tree::vertex *head) {
         return root;
     } else {
         return head->suffix_link;
+    }
+}
+
+suffix_tree::vertex *suffix_tree::rescanning(suffix_tree::vertex *alpha_locus, size_t beta_begin, size_t beta_end) {
+    auto next_edge = alpha_locus->edges.find(string[beta_begin]);
+
+    if (next_edge->second.string_end - next_edge->second.string_begin < beta_end - beta_begin) {
+        return rescanning(next_edge->second.to, next_edge->second.string_end, beta_begin);
+    } else if (next_edge->second.string_end - next_edge->second.string_begin == beta_end - beta_begin) {
+        return next_edge->second.to;
+    } else {
+        position alpha_beta_locus(alpha_locus);
+        alpha_beta_locus.edge_position = beta_end - beta_begin;
+        split_edge_in_position(alpha_beta_locus);
+        return alpha_beta_locus.last_vertex;
+    }
+}
+
+suffix_tree::vertex *suffix_tree::scanning(suffix_tree::vertex *alpha_beta_locus, suffix_tree::vertex *head) {
+    if (head->suffix_link == nullptr) {
+        head->suffix_link = alpha_beta_locus;
     }
 }
