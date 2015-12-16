@@ -25,6 +25,7 @@ suffix_tree::suffix_tree(const std::vector<size_t> &string_):
 }
 
 suffix_tree::~suffix_tree() {
+    clear(root);
 }
 
 std::vector<size_t> &&suffix_tree::add_0(std::vector<size_t> string_) {
@@ -160,4 +161,12 @@ suffix_tree::vertex *suffix_tree::scanning(size_t suffix,
        .insert(std::make_pair(string[tail_start], edge(tail_start, string.size(), pos.last_vertex, new_vertex)));
 
     return pos.last_vertex;
+}
+
+void suffix_tree::clear(suffix_tree::vertex *start) {
+    for (auto &item : start->edges) {
+        clear(item.second.to);
+    }
+
+    delete start;
 }

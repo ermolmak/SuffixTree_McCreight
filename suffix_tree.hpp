@@ -55,4 +55,6 @@ private:
     vertex *get_alpha_locus(vertex *head) const;
     vertex *rescanning(vertex *alpha_locus, size_t beta_begin, size_t beta_end);
     vertex *scanning(size_t suffix, vertex *alpha_beta_locus, vertex *head);
+
+    void clear(vertex *start);
 };
