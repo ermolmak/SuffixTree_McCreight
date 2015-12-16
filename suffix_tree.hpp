@@ -52,7 +52,9 @@ public:
 private:
     bool next_position(position &pos, size_t symbol);
     void split_edge_in_position(position &pos);
+
     void check_string() const;
     void build();
     void build_first();
+    vertex *alpha_locus(vertex *head);
 };

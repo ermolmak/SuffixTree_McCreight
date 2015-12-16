@@ -1,14 +1,14 @@
 #include "suffix_tree.hpp"
 
 suffix_tree::vertex::vertex():
-        parent(nullptr), suffix_link(nullptr), string_begin(0), string_end(0), parent_edge(nullptr), edges() {
+        parent(nullptr), suffix_link(nullptr), string_begin(0), string_end(0), parent_edge(), edges() {
 }
 
 suffix_tree::vertex::vertex(vertex *parent,
                             vertex *suffix_link,
                             size_t string_begin,
                             size_t string_end,
-                            std::map<size_t, edge>::iterator parent_edge):
+                            std::map<size_t, edge>::iterator parent_edge = std::map<size_t, edge>::iterator()):
         parent(parent), suffix_link(suffix_link), string_begin(string_begin), string_end(string_end),
         parent_edge(parent_edge), edges() {
 }
@@ -98,9 +98,24 @@ void suffix_tree::build() {
 }
 
 void suffix_tree::build_first() {
-    root = new vertex();
-    vertex *children = new vertex();
+    root = new vertex(nullptr, nullptr, 0, 0);
+    vertex *children = new vertex(root, nullptr, 0, string.size());
 
     children->parent_edge = root->edges.insert(std::make_pair(string[0], edge(0, string.size(), root, children))).first;
     children->parent = root;
+}
+
+suffix_tree::vertex *suffix_tree::alpha_locus(suffix_tree::vertex *head) {
+    if (head == root) {
+        return root;
+    }
+
+    size_t alpha_begin = head->string_begin + 1;
+    size_t alpha_end = head->string_end;
+
+    if (alpha_begin == alpha_end) {
+        return root;
+    } else {
+        return head->suffix_link;
+    }
 }
