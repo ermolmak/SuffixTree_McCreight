@@ -1,10 +1,20 @@
 #include "suffix_tree.hpp"
 
-suffix_tree::vertex::vertex(): parent(nullptr), suffix_link(nullptr), edges(), parent_edge() {
+suffix_tree::vertex::vertex():
+        parent(nullptr), suffix_link(nullptr), string_begin(0), string_end(0), parent_edge(nullptr), edges() {
 }
 
-suffix_tree::edge::edge(size_t first, size_t last, vertex *from, vertex *to):
-        first(first), last(last), from(from), to(to) {
+suffix_tree::vertex::vertex(vertex *parent,
+                            vertex *suffix_link,
+                            size_t string_begin,
+                            size_t string_end,
+                            std::map<size_t, edge>::iterator parent_edge):
+        parent(parent), suffix_link(suffix_link), string_begin(string_begin), string_end(string_end),
+        parent_edge(parent_edge), edges() {
+}
+
+suffix_tree::edge::edge(size_t string_begin, size_t string_end, vertex *from, vertex *to):
+        string_begin(string_begin), string_end(string_end), from(from), to(to) {
 }
 
 suffix_tree::position::position(const std::map<size_t, edge>::iterator &current_edge):
@@ -35,19 +45,46 @@ bool suffix_tree::next_position(position &pos, size_t symbol) {
         pos.current_edge = next_edge;
         pos.edge_position = 1;
     } else {
-        if (string[pos.current_edge->second.first + pos.edge_position] != symbol) {
+        if (string[pos.current_edge->second.string_begin + pos.edge_position] != symbol) {
             return false;
         }
 
         ++pos.edge_position;
     }
 
-    if (pos.edge_position == pos.current_edge->second.last - pos.current_edge->second.first) {
+    if (pos.edge_position == pos.current_edge->second.string_end - pos.current_edge->second.string_begin) {
         pos.last_vertex = pos.current_edge->second.to;
         pos.edge_position = 0;
     }
 
     return true;
+}
+
+void suffix_tree::split_edge_in_position(suffix_tree::position &pos) {
+    if (pos.edge_position == 0) {
+        return;
+    }
+
+    vertex *new_vertex = new vertex(pos.current_edge->second.from,
+                                    nullptr,
+                                    pos.current_edge->second.string_begin,
+                                    pos.current_edge->second.string_begin + pos.edge_position,
+                                    pos.current_edge);
+    new_vertex->edges
+              .insert(std::make_pair(string[new_vertex->string_end],
+                                     edge(new_vertex->string_end,
+                                          pos.current_edge->second.string_end,
+                                          new_vertex,
+                                          pos.current_edge->second.to)));
+
+    pos.current_edge->second.to->parent = new_vertex;
+    pos.current_edge->second.to->parent_edge = new_vertex->edges.begin();
+
+    pos.current_edge->second.to = new_vertex;
+    pos.current_edge->second.string_end = new_vertex->string_end;
+
+    pos.last_vertex = new_vertex;
+    pos.edge_position = 0;
 }
 
 void suffix_tree::check_string() const {

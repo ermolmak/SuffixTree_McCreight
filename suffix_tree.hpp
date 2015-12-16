@@ -14,17 +14,23 @@ private:
     struct vertex {
         vertex *parent;
         vertex *suffix_link;
-        std::map<size_t, edge> edges;
+        size_t string_begin, string_end;
         std::map<size_t, edge>::iterator parent_edge;
+        std::map<size_t, edge> edges;
 
         vertex();
+        vertex(vertex *parent,
+               vertex *suffix_link,
+               size_t string_begin,
+               size_t string_end,
+               std::map<size_t, edge>::iterator parent_edge);
     };
 
     struct edge {
-        size_t first, last;
+        size_t string_begin, string_end;
         vertex *from, *to;
 
-        edge(size_t first, size_t last, vertex *from, vertex *to);
+        edge(size_t string_begin, size_t string_end, vertex *from, vertex *to);
     };
 
     struct position {
@@ -45,6 +51,7 @@ public:
     ~suffix_tree();
 private:
     bool next_position(position &pos, size_t symbol);
+    void split_edge_in_position(position &pos);
     void check_string() const;
     void build();
     void build_first();
