@@ -14,23 +14,19 @@ private:
     struct vertex {
         vertex *parent;
         vertex *suffix_link;
-        size_t string_begin, string_end;
+        size_t depth;
         std::map<size_t, edge>::iterator parent_edge;
         std::map<size_t, edge> edges;
 
         vertex();
-        vertex(vertex *parent,
-               vertex *suffix_link,
-               size_t string_begin,
-               size_t string_end,
-               std::map<size_t, edge>::iterator parent_edge);
+        explicit vertex(vertex *parent_, size_t depth_, std::map<size_t, edge>::iterator parent_edge_);
     };
 
     struct edge {
         size_t string_begin, string_end;
         vertex *from, *to;
 
-        edge(size_t string_begin, size_t string_end, vertex *from, vertex *to);
+        edge(size_t string_begin_, size_t string_end_, vertex *from_, vertex *to_);
     };
 
     struct position {
@@ -38,7 +34,7 @@ private:
         std::map<size_t, edge>::iterator current_edge;
         size_t edge_position;
 
-        explicit position(vertex *last_vertex);
+        explicit position(vertex *last_vertex_);
     };
 
     static std::vector<size_t> &&add_0(std::vector<size_t> string_);
@@ -58,5 +54,5 @@ private:
     void build_first();
     vertex *get_alpha_locus(vertex *head) const;
     vertex *rescanning(vertex *alpha_locus, size_t beta_begin, size_t beta_end);
-    vertex *scanning(vertex *alpha_beta_locus, vertex *head);
+    vertex *scanning(size_t suffix, vertex *alpha_beta_locus, vertex *head);
 };
