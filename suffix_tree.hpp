@@ -24,7 +24,6 @@ private:
         size_t first, last;
         vertex *from, *to;
 
-
         edge(size_t first, size_t last, vertex *from, vertex *to);
     };
 
@@ -45,6 +44,7 @@ public:
     explicit suffix_tree(const std::vector<size_t> &string_);
     ~suffix_tree();
 private:
+    bool next_position(position &pos, size_t symbol);
     void check_string() const;
     void build();
     void build_first();

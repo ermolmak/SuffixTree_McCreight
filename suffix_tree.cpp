@@ -24,6 +24,32 @@ std::vector<size_t> &&suffix_tree::add_0(std::vector<size_t> string_) {
     return std::move(string_);
 }
 
+bool suffix_tree::next_position(position &pos, size_t symbol) {
+    if (pos.edge_position == 0) {
+        auto next_edge = pos.last_vertex->edges.find(symbol);
+
+        if (next_edge == pos.last_vertex->edges.end()) {
+            return false;
+        }
+
+        pos.current_edge = next_edge;
+        pos.edge_position = 1;
+    } else {
+        if (string[pos.current_edge->second.first + pos.edge_position] != symbol) {
+            return false;
+        }
+
+        ++pos.edge_position;
+    }
+
+    if (pos.edge_position == pos.current_edge->second.last - pos.current_edge->second.first) {
+        pos.last_vertex = pos.current_edge->second.to;
+        pos.edge_position = 0;
+    }
+
+    return true;
+}
+
 void suffix_tree::check_string() const {
     if (std::any_of(string.begin(), string.end() - 1, [](size_t x) -> bool { return x == 0; })) {
         throw std::invalid_argument("string contains 0");
