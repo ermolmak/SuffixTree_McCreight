@@ -90,6 +90,15 @@ void suffix_tree::check_string() const {
 
 void suffix_tree::build() {
     build_first();
+
+    vertex *head = root;
+    for (size_t i = 1; i < string.size(); ++i) {
+        vertex *alpha_locus = get_alpha_locus(head);
+        size_t beta_size = head->depth - alpha_locus->depth - (head == root ? 0 : 1);
+
+        vertex *alpha_beta_locus = rescanning(alpha_locus, i - 1 + head->depth - beta_size, i - 1 + head->depth);
+        head = scanning(i, alpha_beta_locus, head);
+    }
 }
 
 void suffix_tree::build_first() {
@@ -116,12 +125,17 @@ suffix_tree::vertex *suffix_tree::rescanning(suffix_tree::vertex *alpha_locus, s
     auto next_edge = alpha_locus->edges.find(string[beta_begin]);
 
     if (next_edge->second.string_end - next_edge->second.string_begin < beta_end - beta_begin) {
-        return rescanning(next_edge->second.to, next_edge->second.string_end, beta_begin);
+
+        return rescanning(next_edge->second.to,
+                          beta_begin + (next_edge->second.string_end - next_edge->second.string_begin),
+                          beta_end);
     } else if (next_edge->second.string_end - next_edge->second.string_begin == beta_end - beta_begin) {
         return next_edge->second.to;
     } else {
+
         position alpha_beta_locus(alpha_locus);
         alpha_beta_locus.edge_position = beta_end - beta_begin;
+
         split_edge_in_position(alpha_beta_locus);
         return alpha_beta_locus.last_vertex;
     }
