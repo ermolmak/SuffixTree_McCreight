@@ -140,4 +140,13 @@ suffix_tree::vertex *suffix_tree::scanning(suffix_tree::vertex *alpha_beta_locus
     if (head->suffix_link == nullptr) {
         head->suffix_link = alpha_beta_locus;
     }
+
+    size_t tail_start = head->string_end;
+    position pos(alpha_beta_locus);
+    for (size_t i = tail_start; next_position(pos, string[i]); ++i) { }
+
+    split_edge_in_position(pos);
+
+    vertex *new_vertex = new vertex(pos.last_vertex, nullptr, pos.last_vertex->string_begin, string.size());
+    //    pos.last_vertex->edges.insert(std::make_pair())
 }
