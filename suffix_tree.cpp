@@ -108,6 +108,7 @@ void suffix_tree::build_first() {
 
     children->parent_edge = root->edges.insert(std::make_pair(string[0], edge(0, string.size(), root, children))).first;
     children->parent = root;
+    root->suffix_link = root;
 }
 
 suffix_tree::vertex *suffix_tree::get_alpha_locus(suffix_tree::vertex *head) const {
@@ -115,7 +116,7 @@ suffix_tree::vertex *suffix_tree::get_alpha_locus(suffix_tree::vertex *head) con
         return root;
     }
 
-    if (head->depth == 1) {
+    if (head->parent == root) {
         return root;
     } else {
         return head->suffix_link;
@@ -123,6 +124,10 @@ suffix_tree::vertex *suffix_tree::get_alpha_locus(suffix_tree::vertex *head) con
 }
 
 suffix_tree::vertex *suffix_tree::rescanning(suffix_tree::vertex *alpha_locus, size_t beta_begin, size_t beta_end) {
+    if (beta_begin == beta_end) {
+        return alpha_locus;
+    }
+
     auto next_edge = alpha_locus->edges.find(string[beta_begin]);
 
     if (next_edge->second.string_end - next_edge->second.string_begin < beta_end - beta_begin) {
@@ -135,6 +140,7 @@ suffix_tree::vertex *suffix_tree::rescanning(suffix_tree::vertex *alpha_locus, s
     } else {
 
         position alpha_beta_locus(alpha_locus);
+        next_position(alpha_beta_locus, string[beta_begin]);        // select right edge
         alpha_beta_locus.edge_position = beta_end - beta_begin;
 
         split_edge_in_position(alpha_beta_locus);
@@ -149,7 +155,7 @@ suffix_tree::vertex *suffix_tree::scanning(size_t suffix,
         head->suffix_link = alpha_beta_locus;
     }
 
-    size_t tail_start = string.size() - suffix - head->depth;
+    size_t tail_start = suffix - 1 + head->depth + (head == root ? 1 : 0);
     position pos(alpha_beta_locus);
     for (; next_position(pos, string[tail_start]); ++tail_start) { }
 
