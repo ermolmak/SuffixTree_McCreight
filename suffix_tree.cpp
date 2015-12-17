@@ -116,7 +116,7 @@ suffix_tree::vertex *suffix_tree::get_alpha_locus(suffix_tree::vertex *head) con
         return root;
     }
 
-    if (head->parent == root) {
+    if (head->parent == root || head->parent->depth == 1) {
         return root;
     } else {
         return head->suffix_link;
