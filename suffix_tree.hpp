@@ -8,7 +8,12 @@
 #include <vector>
 
 class suffix_tree {
+public:
+    explicit suffix_tree(const std::vector<size_t> &string_);
+    ~suffix_tree();
+    unsigned long long count_substrings();
 private:
+
     struct edge;
 
     struct vertex {
@@ -41,28 +46,21 @@ private:
     };
 
     static std::vector<size_t> &&add_0(std::vector<size_t> string_);
+    const std::vector<size_t> numeric_string_;
 
-    const std::vector<size_t> string;
-    vertex *root;
-
-public:
-    explicit suffix_tree(const std::vector<size_t> &string_);
-    ~suffix_tree();
+    vertex *root_;
 private:
     bool next_position(position &pos, size_t symbol);
-    void split_edge_in_position(size_t suffix_num, position &pos);
 
+    void split_edge_in_position(size_t suffix_num, position &pos);
     void check_string() const;
     void build();
     void build_first();
     vertex *get_alpha_locus(size_t suffix_num, vertex *head) const;
     vertex *rescanning(size_t suffix_num, vertex *alpha_locus, size_t beta_begin, size_t beta_end);
+
     vertex *scanning(size_t suffix_num, vertex *alpha_beta_locus, vertex *head);
 
     void clear(vertex *start);
-
-public:
-    unsigned long long count_substrings();
-private:
     unsigned long long count_substrings(vertex *start);
 };

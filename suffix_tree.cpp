@@ -20,13 +20,13 @@ suffix_tree::position::position(vertex *last_vertex_):
 }
 
 suffix_tree::suffix_tree(const std::vector<size_t> &string_):
-        string(add_0(string_)) {
+        numeric_string_(add_0(string_)) {
     check_string();
     build();
 }
 
 suffix_tree::~suffix_tree() {
-    clear(root);
+    clear(root_);
 }
 
 std::vector<size_t> &&suffix_tree::add_0(std::vector<size_t> string_) {
@@ -45,7 +45,7 @@ bool suffix_tree::next_position(position &pos, size_t symbol) {
         pos.current_edge = next_edge;
         pos.edge_position = 1;
     } else {
-        if (string[pos.current_edge->second.string_begin + pos.edge_position] != symbol) {
+        if (numeric_string_[pos.current_edge->second.string_begin + pos.edge_position] != symbol) {
             return false;
         }
 
@@ -71,7 +71,7 @@ void suffix_tree::split_edge_in_position(size_t suffix_num, suffix_tree::positio
                        pos.last_vertex->depth + pos.edge_position,
                        pos.current_edge);
     new_vertex->edges
-              .insert(std::make_pair(string[pos.current_edge->second.string_begin + pos.edge_position],
+              .insert(std::make_pair(numeric_string_[pos.current_edge->second.string_begin + pos.edge_position],
                                      edge(pos.current_edge->second.string_begin + pos.edge_position,
                                           pos.current_edge->second.string_end,
                                           new_vertex,
@@ -88,7 +88,7 @@ void suffix_tree::split_edge_in_position(size_t suffix_num, suffix_tree::positio
 }
 
 void suffix_tree::check_string() const {
-    if (std::any_of(string.begin(), string.end() - 1, [](size_t x) -> bool { return x == 0; })) {
+    if (std::any_of(numeric_string_.begin(), numeric_string_.end() - 1, [](size_t x) -> bool { return x == 0; })) {
         throw std::invalid_argument("string contains 0");
     }
 }
@@ -96,10 +96,10 @@ void suffix_tree::check_string() const {
 void suffix_tree::build() {
     build_first();
 
-    vertex *head = root;
-    for (size_t i = 1; i < string.size(); ++i) {
+    vertex *head = root_;
+    for (size_t i = 1; i < numeric_string_.size(); ++i) {
         vertex *alpha_locus = get_alpha_locus(i, head);
-        size_t beta_size = head->depth - alpha_locus->depth - (head == root ? 0 : 1);
+        size_t beta_size = head->depth - alpha_locus->depth - (head == root_ ? 0 : 1);
 
         vertex *alpha_beta_locus = rescanning(i, alpha_locus, i - 1 + head->depth - beta_size, i - 1 + head->depth);
         head = scanning(i, alpha_beta_locus, head);
@@ -107,17 +107,19 @@ void suffix_tree::build() {
 }
 
 void suffix_tree::build_first() {
-    root = new vertex();
-    vertex *children = new vertex(root, 0, string.size());
+    root_ = new vertex();
+    vertex *children = new vertex(root_, 0, numeric_string_.size());
 
-    children->parent_edge = root->edges.insert(std::make_pair(string[0], edge(0, string.size(), root, children))).first;
-    children->parent = root;
-    root->suffix_link = root;
+    children->parent_edge = root_->edges
+                                 .insert(std::make_pair(numeric_string_[0],
+                                                        edge(0, numeric_string_.size(), root_, children))).first;
+    children->parent = root_;
+    root_->suffix_link = root_;
 }
 
 suffix_tree::vertex *suffix_tree::get_alpha_locus(size_t suffix_num, suffix_tree::vertex *head) const {
-    if (head == root) {
-        return root;
+    if (head == root_) {
+        return root_;
     }
 
     vertex *contracted_locus = head;
@@ -126,7 +128,7 @@ suffix_tree::vertex *suffix_tree::get_alpha_locus(size_t suffix_num, suffix_tree
     }
 
     if (contracted_locus->depth <= 1) {
-        return root;
+        return root_;
     } else {
         return contracted_locus->suffix_link;
     }
@@ -140,7 +142,7 @@ suffix_tree::vertex *suffix_tree::rescanning(size_t suffix_num,
         return alpha_locus;
     }
 
-    auto next_edge = alpha_locus->edges.find(string[beta_begin]);
+    auto next_edge = alpha_locus->edges.find(numeric_string_[beta_begin]);
 
     if (next_edge->second.string_end - next_edge->second.string_begin < beta_end - beta_begin) {
 
@@ -153,7 +155,7 @@ suffix_tree::vertex *suffix_tree::rescanning(size_t suffix_num,
     } else {
 
         position alpha_beta_locus(alpha_locus);
-        next_position(alpha_beta_locus, string[beta_begin]);        // select right edge
+        next_position(alpha_beta_locus, numeric_string_[beta_begin]);        // select right edge
         alpha_beta_locus.edge_position = beta_end - beta_begin;
 
         split_edge_in_position(suffix_num, alpha_beta_locus);
@@ -168,16 +170,17 @@ suffix_tree::vertex *suffix_tree::scanning(size_t suffix_num,
         head->suffix_link = alpha_beta_locus;
     }
 
-    size_t tail_start = suffix_num - 1 + head->depth + (head == root ? 1 : 0);
+    size_t tail_start = suffix_num - 1 + head->depth + (head == root_ ? 1 : 0);
     position pos(alpha_beta_locus);
-    for (; next_position(pos, string[tail_start]); ++tail_start) { }
+    for (; next_position(pos, numeric_string_[tail_start]); ++tail_start) { }
 
     split_edge_in_position(suffix_num, pos);
 
-    vertex *new_vertex = new vertex(pos.last_vertex, suffix_num, pos.last_vertex->depth + string.size() - tail_start);
-    pos.last_vertex
-       ->edges
-       .insert(std::make_pair(string[tail_start], edge(tail_start, string.size(), pos.last_vertex, new_vertex)));
+    vertex *new_vertex =
+            new vertex(pos.last_vertex, suffix_num, pos.last_vertex->depth + numeric_string_.size() - tail_start);
+    pos.last_vertex->edges
+       .insert(std::make_pair(numeric_string_[tail_start],
+                              edge(tail_start, numeric_string_.size(), pos.last_vertex, new_vertex)));
 
     return pos.last_vertex;
 }
@@ -191,8 +194,8 @@ void suffix_tree::clear(suffix_tree::vertex *start) {
 }
 
 unsigned long long suffix_tree::count_substrings() {
-    unsigned long long counter = count_substrings(root);
-    counter -= string.size();   // 0-end substrings
+    unsigned long long counter = count_substrings(root_);
+    counter -= numeric_string_.size();   // 0-end substrings
     return counter;
 }
 

@@ -29,10 +29,10 @@ std::vector<size_t> generate_string() {
     return result;
 }
 
-unsigned long long count_trivial(const std::vector<size_t> &string) {
+unsigned long long count_trivial(const std::vector<size_t> &numeric_string) {
     std::set<std::vector<size_t>> substrings;
-    for (auto first = string.begin(); first != string.end(); ++first) {
-        for (auto last = first; last != string.end(); ++last) {
+    for (auto first = numeric_string.begin(); first != numeric_string.end(); ++first) {
+        for (auto last = first; last != numeric_string.end(); ++last) {
             substrings.insert(std::vector<size_t>(first, last + 1));
         }
     }
