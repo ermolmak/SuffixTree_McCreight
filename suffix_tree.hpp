@@ -15,11 +15,14 @@ private:
         vertex *parent;
         vertex *suffix_link;
         size_t depth;
+        size_t tree_num;
         std::map<size_t, edge>::iterator parent_edge;
         std::map<size_t, edge> edges;
 
         vertex();
-        explicit vertex(vertex *parent_, size_t depth_, std::map<size_t, edge>::iterator parent_edge_);
+
+        explicit
+        vertex(vertex *parent_, size_t tree_num_, size_t depth_, std::map<size_t, edge>::iterator parent_edge_);
     };
 
     struct edge {
@@ -47,19 +50,19 @@ public:
     ~suffix_tree();
 private:
     bool next_position(position &pos, size_t symbol);
-    void split_edge_in_position(position &pos);
+    void split_edge_in_position(size_t suffix_num, position &pos);
 
     void check_string() const;
     void build();
     void build_first();
-    vertex *get_alpha_locus(vertex *head) const;
-    vertex *rescanning(vertex *alpha_locus, size_t beta_begin, size_t beta_end);
-    vertex *scanning(size_t suffix, vertex *alpha_beta_locus, vertex *head);
+    vertex *get_alpha_locus(size_t suffix_num, vertex *head) const;
+    vertex *rescanning(size_t suffix_num, vertex *alpha_locus, size_t beta_begin, size_t beta_end);
+    vertex *scanning(size_t suffix_num, vertex *alpha_beta_locus, vertex *head);
 
     void clear(vertex *start);
 
 public:
-    size_t count_substrings();
+    unsigned long long count_substrings();
 private:
-    size_t count_substrings(vertex *start);
+    unsigned long long count_substrings(vertex *start);
 };
